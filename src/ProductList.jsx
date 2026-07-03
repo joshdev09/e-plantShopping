@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux'; // Added useSelector
 import './ProductList.css';
 import CartItem from './CartItem';
-import { addItem } from './CartSlice'; // Ensure this path is correct
+import { addItem } from './CartSlice'; 
 
 function ProductList({ onHomeClick }) {
     const [showCart, setShowCart] = useState(false);
     const [showPlants, setShowPlants] = useState(false); 
-    const [addedToCart, setAddedToCart] = useState({}); // State to track added items
-    const dispatch = useDispatch(); // Redux dispatch hook
+    const [addedToCart, setAddedToCart] = useState({}); 
+    
+    const dispatch = useDispatch(); 
+    
+    // Retrieve cart items from Redux store
+    const cartItems = useSelector((state) => state.cart.items);
+
+    // Calculate total quantity of items in the cart
+    const totalQuantity = cartItems.reduce((total, item) => total + item.quantity, 0);
 
     const plantsArray = [
         {
@@ -217,12 +224,11 @@ function ProductList({ onHomeClick }) {
         textDecoration: 'none',
     };
 
-    // Add to Cart Functionality
     const handleAddToCart = (product) => {
-        dispatch(addItem(product)); // Dispatch action to Redux store
+        dispatch(addItem(product));
         setAddedToCart((prevState) => ({
             ...prevState,
-            [product.name]: true, // Mark the product as added
+            [product.name]: true, 
         }));
     };
 
@@ -272,6 +278,8 @@ function ProductList({ onHomeClick }) {
                                     <circle cx="184" cy="216" r="12"></circle>
                                     <path d="M42.3,72H221.7l-26.4,92.4A15.9,15.9,0,0,1,179.9,176H84.1a15.9,15.9,0,0,1-15.4-11.6L32.5,37.8A8,8,0,0,0,24.8,32H8" fill="none" stroke="#faf9f9" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" id="mainIconPathAttribute"></path>
                                 </svg>
+                                {/* Display total quantity badge if items are in the cart */}
+                                {totalQuantity > 0 && <span className="cart-badge" style={{fontSize: '20px', color: 'white', backgroundColor: 'red', borderRadius: '50%', padding: '2px 10px', position: 'relative', top: '-25px', right: '15px'}}>{totalQuantity}</span>}
                             </h1>
                         </a>
                     </div>
@@ -280,7 +288,6 @@ function ProductList({ onHomeClick }) {
 
             {!showCart ? (
                 <div className="product-grid">
-                    {/* Render Categories and Plants */}
                     {plantsArray.map((category, index) => (
                         <div key={index}>
                             <h1>
@@ -289,18 +296,14 @@ function ProductList({ onHomeClick }) {
                             <div className="product-list">
                                 {category.plants.map((plant, plantIndex) => (
                                     <div className="product-card" key={plantIndex}>
-                                        <img 
-                                            className="product-image" 
-                                            src={plant.image} 
-                                            alt={plant.name} 
-                                        />
+                                        <img className="product-image" src={plant.image} alt={plant.name} />
                                         <div className="product-title">{plant.name}</div>
                                         <div className="product-description">{plant.description}</div>
                                         <div className="product-cost">{plant.cost}</div>
                                         <button
                                             className="product-button"
                                             onClick={() => handleAddToCart(plant)}
-                                            disabled={addedToCart[plant.name]} // Disable button if already added
+                                            disabled={addedToCart[plant.name]} 
                                         >
                                             {addedToCart[plant.name] ? "Added to Cart" : "Add to Cart"}
                                         </button>
